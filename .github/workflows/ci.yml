@@ -1,0 +1,45 @@
+name: Django CI
+
+# Le script se lance quand on push sur main/master ou qu'on fait une PR
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    # 1. GitHub récupère ton code
+    - uses: actions/checkout@v4
+    
+    # 2. GitHub installe Python 3.11
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip' # Accélère l'installation des dépendances
+        
+    # 3. Installation de tes dépendances locales (qui contiennent pytest, black, etc.)
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/local.txt
+        pip install isort whitenoise
+        
+    # 4. Vérification que le code est bien formaté
+    - name: Check Formatting
+      run: |
+        black --check --extend-exclude="manage\.py" .
+        isort --check-only .
+        
+    # 5. Lancement de tes tests automatisés
+    - name: Run Tests
+      env:
+        SECRET_KEY: "dummy-key-for-github-actions"
+        DEBUG: "True"
+        # On utilise une base de données SQLite en mémoire pour que les tests soient ultra rapides et ne dépendent pas de PostgreSQL
+        DATABASE_URL: "sqlite:///:memory:"
+      run: |
+        pytest

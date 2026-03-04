@@ -1,0 +1,21 @@
+# Core Django & API
+Django>=5.0
+djangorestframework
+djangorestframework-simplejwt
+django-environ
+django-cors-headers
+django-filter
+drf-yasg
+
+# Auth & Social
+django-allauth
+social-auth-app-django
+
+# Database & Storage
+psycopg2-binary
+django-storages
+boto3
+Pillow
+
+# UI/UX
+django-ckeditor

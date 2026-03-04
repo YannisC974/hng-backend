@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    expose:
+      - "5432" # Restreint l'accès au port DB uniquement au réseau interne Docker
+
+  web:
+    build: .
+    # Utilisation de Gunicorn au lieu de runserver pour la production/sécurité
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --worker-tmp-dir /dev/shm --no-control-socket
+    volumes:
+      - .:/app:ro # ":ro" signifie Read-Only (sécurité supplémentaire)
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/swagger/\")' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# C'est cette partie qui manquait et qui causait l'erreur !
+volumes:
+  postgres_data:
