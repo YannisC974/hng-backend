@@ -26,6 +26,5 @@ services:
       timeout: 10s
       retries: 3
 
-# C'est cette partie qui manquait et qui causait l'erreur !
 volumes:
   postgres_data:
